@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Contract, ethers, formatEther } from 'ethers';
 import Container from 'react-bootstrap/Container'
-import { Row, Col, Form, Button, Toast, ToastContainer, Alert } from 'react-bootstrap';
+import { Row, Col, Form, Button, Toast, ToastContainer, Table } from 'react-bootstrap';
 
 const Voting = () => {
 
@@ -14,7 +14,9 @@ const Voting = () => {
     const [accountAddress, setAccountAddress] = useState("");
     const [accBalance, setAccBalance] = useState();
     const [candidates, setCandidates] = useState([]);
+    const [signerContract, setSignerContract] = useState();
     const [vote, setVote] = useState('');
+    const [hasVoted, setHasVoted] = useState(false)
 
     // For Toast
     const [show, setShow] = useState(false)
@@ -114,27 +116,15 @@ const Voting = () => {
         }
     ]
 
-    useEffect(async () => {
-
+    const handleAccountsChanged = async () => {
         let accs;
+        provider = new ethers.BrowserProvider(window.ethereum)
 
-        // Connect to the Blockchain via MetaMask
-        if (window.ethereum == null) {
+        accs = (await provider.listAccounts())[0]
+        setAccountAddress(accs.address)
 
-            // If metamask is not installed, use default provider
-            provider = ethers.getDefaultProvider();
-
-        } else {
-
-            // Connect to MetaMask EIP-1193 Object. Read-only object
-            provider = new ethers.BrowserProvider(window.ethereum)
-
-            accs = (await provider.listAccounts())[0]
-            setAccountAddress(accs.address)
-
-            // Needed for writing operations since provider can't do that
-            signer = await provider.getSigner();
-        }
+        // Needed for writing operations since provider can't do that
+        signer = await provider.getSigner();
 
         // Get balance of current account
         balance = await provider.getBalance(accs.address)
@@ -145,8 +135,27 @@ const Voting = () => {
          * inside the ABI and as a provider -> we can't write just read yet
          * */
         contract = new Contract(contractAddress, ABI, provider)
+        setSignerContract(new Contract(contractAddress, ABI, signer));
 
+        // Fills list of candidates from smart contract
         queryCandidates(contract)
+        setHasVoted(await contract.voters(accs.address))
+    }
+
+    useEffect(async () => {
+
+        // Connect to the Blockchain via MetaMask
+        if (window.ethereum == null) {
+
+            // If metamask is not installed, use default provider
+            provider = ethers.getDefaultProvider();
+
+        } else {
+            await handleAccountsChanged()
+        }
+
+        // This tracks MetaMask account changes and then updates all values
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
 
     }, [])
 
@@ -168,14 +177,23 @@ const Voting = () => {
     }
 
     const handleVoteSelection = (event) => {
-        setVote(event.target.value)
+        setVote(candidates.find((voter) => voter.name === event.target.value))
     }
 
-    const handleVoteSumbission = (event) => {
+    const handleVoteSumbission = async (event) => {
         event.preventDefault();
         // Checks if the selected candidate is valid
-        if (candidates.find((voter) => voter.name === vote)) {
-            console.log("You selected " + vote)
+        if (candidates.find((voter) => voter.name === vote[1]) && !hasVoted) {
+            try {
+                signerContract.vote(vote.id);
+            } catch (error) {
+                setShow(true)
+                console.log(error)
+            }
+            balance = await provider.getBalance(accs.address)
+            setAccBalance(formatEther(balance))
+
+
         } else {
             // Toast of invalid vote logic
             setShow(true)
@@ -194,7 +212,7 @@ const Voting = () => {
                 </Row>
                 <Form onSubmit={handleVoteSumbission}>
                     <Form.Select onChange={handleVoteSelection} size='lg' aria-label="Default select example">
-                        <option value={""} >Please choose a candidate</option>
+                        <option>Please choose a candidate</option>
                         {candidates ? candidates.map((candidate) => {
                             return (
                                 <option value={candidate.name} >{candidate.name}</option>
@@ -203,10 +221,35 @@ const Voting = () => {
                     </Form.Select>
                     <Button style={{ marginTop: 10 }} type='submit'> Submit Vote </Button>
                 </Form>
+
+                <Table>
+                    <thead>
+                        <tr>
+                            <th> # </th>
+                            <th> Name </th>
+                            <th> Votes </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {candidates ? candidates
+                            .sort((a, b) => (a.voteCount > b.voteCount ? -1 : 1))
+                            .map((candidate) => {
+                                return (
+                                    <tr>
+                                        <td> {candidate.id} </td>
+                                        <td> {candidate.name} </td>
+                                        <td> {candidate.voteCount} </td>
+                                    </tr>
+                                )
+                            })
+                            : []}
+                    </tbody>
+                </Table>
+
                 <ToastContainer className='m-2' position='bottom-end'>
                     <Toast bg="danger" onClose={() => setShow(false)} show={show} delay={3000} autohide>
                         <Toast.Body className='text-white'>
-                            Your vote was invalid
+                            {hasVoted ? "You have already voted" : "Your vote was invalid"}
                         </Toast.Body>
                     </Toast>
                 </ToastContainer>

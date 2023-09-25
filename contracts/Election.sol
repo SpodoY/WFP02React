@@ -20,6 +20,8 @@ contract Election {
 
     uint public candidateCount;
 
+    uint public voterCount;
+
     event votedEvent(uint indexed _candidateId);
 
     constructor() {
@@ -35,14 +37,24 @@ contract Election {
     }
 
     function vote(uint _candidateId) public {
-        require(!voters[msg.sender]); // Checks if voter has voted
-        require(_candidateId > 0 && _candidateId <= candidateCount); // Checks if candidate is in valid range
+        // Checks if voter has voted
+        require(
+            !voters[msg.sender], 
+            "You have already voted"
+        ); 
+
+         // Checks if candidate is in valid range
+        require(
+            _candidateId > 0 && _candidateId <= candidateCount,
+            "Then candidate you wanted to vote for is invalid"
+        );
 
         // register that user voted
         voters[msg.sender] = true;
 
         //increase the vote count
         candidates[_candidateId].voteCount++;
+        voterCount++;
 
         emit votedEvent(_candidateId);
     }
