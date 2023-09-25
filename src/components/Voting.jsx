@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Contract, ethers, formatEther } from 'ethers';
 import Container from 'react-bootstrap/Container'
-import { Row, Col, Form, Button, Toast, ToastContainer } from 'react-bootstrap';
+import { Row, Col, Form, Button, Toast, ToastContainer, Alert } from 'react-bootstrap';
 
 const Voting = () => {
 
@@ -177,8 +177,8 @@ const Voting = () => {
         if (candidates.find((voter) => voter.name === vote)) {
             console.log("You selected " + vote)
         } else {
+            // Toast of invalid vote logic
             setShow(true)
-            // Alert of invalid vote logic
         }
     }
 
@@ -204,8 +204,8 @@ const Voting = () => {
                     <Button style={{ marginTop: 10 }} type='submit'> Submit Vote </Button>
                 </Form>
                 <ToastContainer className='m-2' position='bottom-end'>
-                    <Toast bg='warning' onClose={() => setShow(false)} show={show} delay={3000} autohide>
-                        <Toast.Body>
+                    <Toast bg="danger" onClose={() => setShow(false)} show={show} delay={3000} autohide>
+                        <Toast.Body className='text-white'>
                             Your vote was invalid
                         </Toast.Body>
                     </Toast>
