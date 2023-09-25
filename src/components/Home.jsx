@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import WalletBalance from "./WalletBalance";
 
 import Eleciton from "../artifacts/contracts/Election.sol/Election.json";
-import Voting from "./Voting";
 const contactAddress = '0x5fbdb2315678afecb367f032d93f642f64180aa3'
+
+import Voting from "./Voting";
 
 const provider = new ethers.BrowserProvider(window.ethereum)
 
