@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Contract, ethers, formatEther } from 'ethers';
 import Container from 'react-bootstrap/Container'
-import { Row, Col, Form, Button } from 'react-bootstrap';
+import { Row, Col, Form, Button, Toast, ToastContainer } from 'react-bootstrap';
 
 const Voting = () => {
 
     let signer = null;
     let provider;
     let balance;
+    let contract;
     const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3"
 
-    const [accountAddress, setAccountAddress] = useState("")
-    const [accBalance, setAccBalance] = useState()
-    const [candidates, setCandidates] = useState([])
+    const [accountAddress, setAccountAddress] = useState("");
+    const [accBalance, setAccBalance] = useState();
+    const [candidates, setCandidates] = useState([]);
     const [vote, setVote] = useState('');
+
+    // For Toast
+    const [show, setShow] = useState(false)
 
     const ABI = [
         {
@@ -140,49 +144,72 @@ const Voting = () => {
          * Creates a contract object with my contract address, the defined functions
          * inside the ABI and as a provider -> we can't write just read yet
          * */
-        const contract = new Contract(contractAddress, ABI, provider)
+        contract = new Contract(contractAddress, ABI, provider)
 
-        // Queries how many candidates we have (4)
-        const candidateAmount = await contract.candidateCount();
-        console.log(candidateAmount)
-
-        let candidateBuffer = [];
-
-        for (let i = 1; i <= candidateAmount; i++) {
-            const curCandidate = await contract.candidates(i)
-            candidateBuffer.push(curCandidate)
-            console.log(curCandidate)
-        }
-
-        setCandidates(candidateBuffer)
+        queryCandidates(contract)
 
     }, [])
 
+    const queryCandidates = async (contractObject) => {
+
+        // Queries how many candidates we have (4)
+        const candidateAmount = await contractObject.candidateCount();
+
+        // Needed since umm... useState shenanigangs
+        let buffer = Array()
+
+        // Adds all candidates to buffer
+        for (let i = 1; i <= candidateAmount; i++) {
+            const curCandidate = await contractObject.candidates(i)
+            buffer.push(curCandidate)
+        }
+        // Updates candidates
+        setCandidates(buffer)
+    }
+
     const handleVoteSelection = (event) => {
-        const val = event.target.value;
-        setVote(val)
-        console.log(val)
+        setVote(event.target.value)
+    }
+
+    const handleVoteSumbission = (event) => {
+        event.preventDefault();
+        // Checks if the selected candidate is valid
+        if (candidates.find((voter) => voter.name === vote)) {
+            console.log("You selected " + vote)
+        } else {
+            setShow(true)
+            // Alert of invalid vote logic
+        }
     }
 
     return (
         <>
             <Container>
-                <Row style={{ marginTop: 30 }}>
+                <Row className='mt-4'>
                     <Col>
                         <h3> Welcome to the election </h3>
                         <p> Currently voting as: {accountAddress} ETH</p>
                         <p> Current balance: {accBalance} ETH</p>
                     </Col>
                 </Row>
-                <Form.Select onChange={handleVoteSelection} size='lg' aria-label="Default select example">
-                    <option> Select a candidate to vote for </option>
-                    {candidates.map((candidate) => {
-                        return (
-                            <option value={candidate.name} >{candidate.name}</option>
-                        )
-                    })}
-                </Form.Select>
-                <Button style={{ marginTop: 10 }}> Submit Vote </Button>
+                <Form onSubmit={handleVoteSumbission}>
+                    <Form.Select onChange={handleVoteSelection} size='lg' aria-label="Default select example">
+                        <option value={""} >Please choose a candidate</option>
+                        {candidates ? candidates.map((candidate) => {
+                            return (
+                                <option value={candidate.name} >{candidate.name}</option>
+                            )
+                        }) : []}
+                    </Form.Select>
+                    <Button style={{ marginTop: 10 }} type='submit'> Submit Vote </Button>
+                </Form>
+                <ToastContainer className='m-2' position='bottom-end'>
+                    <Toast bg='warning' onClose={() => setShow(false)} show={show} delay={3000} autohide>
+                        <Toast.Body>
+                            Your vote was invalid
+                        </Toast.Body>
+                    </Toast>
+                </ToastContainer>
             </Container >
         </>
     )
