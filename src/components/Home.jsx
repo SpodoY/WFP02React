@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import WalletBalance from "./WalletBalance";
 
 import Eleciton from "../artifacts/contracts/Election.sol/Election.json";
-const contactAddress = '0x5fbdb2315678afecb367f032d93f642f64180aa3'
+const contactAddress = '0x31516Af046aaaacA9d75c0427787dd69490A2aC4'
 
 import Voting from "./Voting";
 

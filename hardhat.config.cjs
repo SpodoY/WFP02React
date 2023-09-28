@@ -1,4 +1,10 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
+
+const { INFURA_API_KEY, MNEMONIC } = process.env
+
+// Transaction Hash: 0xedc6a42b5e38a50137d392907580ca8f069f6ef9894c3d1935511a9386413971
+// Link for Transaction: https://sepolia.etherscan.io/tx/0xedc6a42b5e38a50137d392907580ca8f069f6ef9894c3d1935511a9386413971
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -8,17 +14,12 @@ module.exports = {
   },
   networks: {
     hardhat: {
-      chainId: 1337,
+      chainId: 31337,
     },
-    arbitrumGoerli: {
-      url: 'https://goerli-rollup.arbitrum.io/rpc',
-      chainId: 421613,
-      accounts: ""
-    },
-    arbitrumOne: {
-      url: 'https://arb1.arbitrum.io/rpc',
-      accounts: ""
-      //accounts: [ARBITRUM_MAINNET_TEMPORARY_PRIVATE_KEY]
-    },
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
+      accounts: [MNEMONIC]
+    }
+
   }
 };
