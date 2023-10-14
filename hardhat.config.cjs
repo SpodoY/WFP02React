@@ -19,6 +19,11 @@ module.exports = {
     sepolia: {
       url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [MNEMONIC]
+    },
+    arbitrum_goerli:
+    {
+      url: `https://arbitrum-goerli.infura.io/v3/${INFURA_API_KEY}`,
+      accounts: [MNEMONIC]
     }
 
   }

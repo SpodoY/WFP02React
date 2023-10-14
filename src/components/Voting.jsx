@@ -9,7 +9,9 @@ const Voting = () => {
     let provider;
     let balance;
     let contract;
-    const contractAddress = "0x31516Af046aaaacA9d75c0427787dd69490A2aC4"
+
+    //VITE_HARDHAT_CONTRACT_ADDRESS or VITE_SEPOLIA_CONTRACT_ADDRESS
+    const contractAddress = import.meta.env.VITE_ARBITRUM_CONTRACT_ADDRESS
 
     const [accountAddress, setAccountAddress] = useState("");
     const [accBalance, setAccBalance] = useState();

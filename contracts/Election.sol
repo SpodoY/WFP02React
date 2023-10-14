@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-// Truffle Console: Election.deployed().then((i) => {app = i})
-// Get First Candidate: app.candidates(1).then(c => {can = c})
-
 contract Election {
 
     struct Candidate {
