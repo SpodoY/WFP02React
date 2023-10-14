@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
+require("hardhat-gas-reporter");
+require("ethers")
 
 const { INFURA_API_KEY, MNEMONIC } = process.env
 
@@ -25,6 +27,14 @@ module.exports = {
       url: `https://arbitrum-goerli.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [MNEMONIC]
     }
+  },
 
+  // To run specific network type: "npx hardhat test --network <some network defined above>"
+  gasReporter: {
+    enabled: (process.env.REPORT_GAS) ? true : false,
+    currency: 'EUR',
+    noColors: true,
+    outputFile: "gas-report.txt",
+    coinmarketcap: process.env.COINMAKERKET_API_KEY,
   }
 };

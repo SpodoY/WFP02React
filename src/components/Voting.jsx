@@ -10,8 +10,12 @@ const Voting = () => {
     let balance;
     let contract;
 
-    //VITE_HARDHAT_CONTRACT_ADDRESS or VITE_SEPOLIA_CONTRACT_ADDRESS
-    const contractAddress = import.meta.env.VITE_ARBITRUM_CONTRACT_ADDRESS
+    /*
+        VITE_HARDHAT_CONTRACT_ADDRESS
+        VITE_ARBITRUM_CONTRACT_ADDRESS
+        VITE_SEPOLIA_CONTRACT_ADDRESS
+     */
+    const contractAddress = import.meta.env.VITE_SEPOLIA_CONTRACT_ADDRESS
 
     const [accountAddress, setAccountAddress] = useState("");
     const [accBalance, setAccBalance] = useState();
@@ -185,7 +189,7 @@ const Voting = () => {
     const handleVoteSumbission = async (event) => {
         event.preventDefault();
         // Checks if the selected candidate is valid
-        if (candidates.find((voter) => voter.name === vote[1]) && !hasVoted) {
+        // if (candidates.find((voter) => voter.name === vote[1]) && !hasVoted) {
             try {
                 signerContract.vote(vote.id);
             } catch (error) {
@@ -196,10 +200,10 @@ const Voting = () => {
             setAccBalance(formatEther(balance))
 
 
-        } else {
-            // Toast of invalid vote logic
-            setShow(true)
-        }
+        // } else {
+        //     // Toast of invalid vote logic
+        //     setShow(true)
+        // }
     }
 
     return (

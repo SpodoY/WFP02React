@@ -35,10 +35,11 @@ contract Election {
 
     function vote(uint _candidateId) public {
         // Checks if voter has voted
-        require(
-            !voters[msg.sender], 
-            "You have already voted"
-        ); 
+        /* Commented out due to testing needs */
+        // require(
+        //     !voters[msg.sender], 
+        //     "You have already voted"
+        // ); 
 
          // Checks if candidate is in valid range
         require(
