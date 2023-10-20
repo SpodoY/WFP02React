@@ -6,7 +6,7 @@ describe("Election contract", () => {
 
     beforeEach(async () => {
         contract = await ethers.deployContract("Election");
-        await election.waitForDeployment();
+        await contract.waitForDeployment();
     })
 
     it("Get candidates after deployment", async () => {

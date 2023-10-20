@@ -22,9 +22,12 @@ module.exports = {
       url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [MNEMONIC]
     },
-    arbitrum_goerli:
-    {
+    arbitrum_goerli: {
       url: `https://arbitrum-goerli.infura.io/v3/${INFURA_API_KEY}`,
+      accounts: [MNEMONIC]
+    },
+    optimism_goerli: {
+      url: `https://optimism-goerli.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [MNEMONIC]
     }
   },
@@ -34,7 +37,7 @@ module.exports = {
     enabled: (process.env.REPORT_GAS) ? true : false,
     currency: 'EUR',
     noColors: true,
-    outputFile: "gas-report.txt",
-    coinmarketcap: process.env.COINMAKERKET_API_KEY,
+    outputFile: "gas-report-hre.txt",
+    coinmarketcap: process.env.COINMAKERKET_API_KEY
   }
 };
