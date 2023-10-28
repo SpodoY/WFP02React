@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Contract, ethers, formatEther } from 'ethers';
-import Container from 'react-bootstrap/Container'
-import { Row, Col, Form, Button, Toast, ToastContainer, Table } from 'react-bootstrap';
+import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
+import CandidateCard from '../components/Candidate';
+import AccountInfo from '../components/Avatar';
+import NavBar from '../components/NavBar';
 
-const Voting = () => {
+const Voting2 = () => {
 
     let signer = null;
     let provider;
-    let balance;
     let contract;
 
     /*
@@ -17,15 +18,8 @@ const Voting = () => {
      */
     const contractAddress = import.meta.env.VITE_HARDHAT_CONTRACT_ADDRESS
 
-    const [accountAddress, setAccountAddress] = useState("");
-    const [accBalance, setAccBalance] = useState();
     const [candidates, setCandidates] = useState([]);
     const [signerContract, setSignerContract] = useState();
-    const [vote, setVote] = useState('');
-    const [hasVoted, setHasVoted] = useState(false)
-
-    // For Toast
-    const [show, setShow] = useState(false)
 
     const ABI = [
         {
@@ -123,18 +117,10 @@ const Voting = () => {
     ]
 
     const handleAccountsChanged = async () => {
-        let accs;
         provider = new ethers.BrowserProvider(window.ethereum)
-
-        accs = (await provider.listAccounts())[0]
-        setAccountAddress(accs.address)
 
         // Needed for writing operations since provider can't do that
         signer = await provider.getSigner();
-
-        // Get balance of current account
-        balance = await provider.getBalance(accs.address)
-        setAccBalance(formatEther(balance))
 
         /**
          * Creates a contract object with my contract address, the defined functions
@@ -145,24 +131,19 @@ const Voting = () => {
 
         // Fills list of candidates from smart contract
         queryCandidates(contract)
-        setHasVoted(await contract.voters(accs.address))
     }
 
     useEffect(async () => {
-
         // Connect to the Blockchain via MetaMask
-        if (window.ethereum == null) {
-
+        if (window.ethereum === null) {
             // If metamask is not installed, use default provider
             provider = ethers.getDefaultProvider();
-
         } else {
             await handleAccountsChanged()
         }
 
         // This tracks MetaMask account changes and then updates all values
         window.ethereum.on('accountsChanged', handleAccountsChanged);
-
     }, [])
 
     const queryCandidates = async (contractObject) => {
@@ -175,94 +156,35 @@ const Voting = () => {
 
         // Adds all candidates to buffer
         for (let i = 1; i <= candidateAmount; i++) {
-            const curCandidate = await contractObject.candidates(i)
-            buffer.push(curCandidate)
+            buffer.push(await contractObject.candidates(i))
         }
         // Updates candidates
         setCandidates(buffer)
     }
 
-    const handleVoteSelection = (event) => {
-        setVote(candidates.find((voter) => voter.name === event.target.value))
-    }
-
-    const handleVoteSumbission = async (event) => {
-        event.preventDefault();
-        // Checks if the selected candidate is valid
-        // if (candidates.find((voter) => voter.name === vote[1]) && !hasVoted) {
-        try {
-            signerContract.vote(vote.id);
-        } catch (error) {
-            setShow(true)
-            console.log(error)
-        }
-        balance = await provider.getBalance(accs.address)
-        setAccBalance(formatEther(balance))
-
-
-        // } else {
-        //     // Toast of invalid vote logic
-        //     setShow(true)
-        // }
+    const handleVoteSumbission = async (id) => {
+        try { await signerContract.vote(id); } 
+        catch (error) { console.log(error) }
     }
 
     return (
         <>
-            <Container>
-                <Row className='mt-4'>
-                    <Col>
-                        <h3> Welcome to the election </h3>
-                        <p> Currently voting as: {accountAddress} ETH</p>
-                        <p> Current balance: {accBalance} ETH</p>
-                    </Col>
-                </Row>
-                <Form onSubmit={handleVoteSumbission}>
-                    <Form.Select onChange={handleVoteSelection} size='lg' aria-label="Default select example">
-                        <option>Please choose a candidate</option>
-                        {candidates ? candidates.map((candidate) => {
-                            return (
-                                <option value={candidate.name} >{candidate.name}</option>
-                            )
-                        }) : []}
-                    </Form.Select>
-                    <Button style={{ marginTop: 10 }} type='submit'> Submit Vote </Button>
-                </Form>
-
-                <Table>
-                    <thead>
-                        <tr>
-                            <th> # </th>
-                            <th> Name </th>
-                            <th> Votes </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {candidates ? candidates
-                            .sort((a, b) => (a.voteCount > b.voteCount ? -1 : 1))
-                            .map((candidate) => {
-                                return (
-                                    <tr>
-                                        <td> {candidate.id} </td>
-                                        <td> {candidate.name} </td>
-                                        <td> {candidate.voteCount} </td>
-                                    </tr>
-                                )
-                            })
-                            : []}
-                    </tbody>
-                </Table>
-
-                <ToastContainer className='m-2' position='bottom-end'>
-                    <Toast bg="danger" onClose={() => setShow(false)} show={show} delay={3000} autohide>
-                        <Toast.Body className='text-white'>
-                            {hasVoted ? "You have already voted" : "Your vote was invalid"}
-                        </Toast.Body>
-                    </Toast>
-                </ToastContainer>
-            </Container >
+            <AccountInfo size={100} />
+            <Grid mt={2} sx={{width: '75%', marginX: 'auto' }} container rowSpacing={8} columnSpacing={4} >
+                {candidates ? candidates.map((candidate) => {
+                    return (
+                        <>
+                            <Grid xs={4}>
+                                <CandidateCard voteFunction={handleVoteSumbission} candidateInfo={candidate} animalName={"raccoon"}/>
+                            </Grid>
+                        </>
+                    )
+                }) : []}
+            </Grid>
+            {/* <NavBar /> */}
         </>
     )
 
 }
 
-export default Voting
+export default Voting2
