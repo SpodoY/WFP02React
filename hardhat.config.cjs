@@ -8,6 +8,13 @@ const { INFURA_API_KEY, MNEMONIC } = process.env
 // Transaction Hash: 0xedc6a42b5e38a50137d392907580ca8f069f6ef9894c3d1935511a9386413971
 // Link for Transaction: https://sepolia.etherscan.io/tx/0xedc6a42b5e38a50137d392907580ca8f069f6ef9894c3d1935511a9386413971
 
+/**
+ * Transaction Sites
+ * Strk: https://testnet-2.starkscan.co/
+ * Arbi: https://goerli.arbiscan.io/
+ * OP: https://goerli-optimism.etherscan.io/
+ */
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.19",
@@ -20,7 +27,7 @@ module.exports = {
     },
     sepolia: {
       url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
-      accounts: [MNEMONIC]
+      accounts: [MNEMONIC],
     },
     arbitrum_goerli: {
       url: `https://arbitrum-goerli.infura.io/v3/${INFURA_API_KEY}`,
@@ -28,6 +35,10 @@ module.exports = {
     },
     optimism_goerli: {
       url: `https://optimism-goerli.infura.io/v3/${INFURA_API_KEY}`,
+      accounts: [MNEMONIC]
+    },
+    starknet_goerli: {
+      url: `https://starknet-goerli.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [MNEMONIC]
     }
   },
@@ -37,7 +48,7 @@ module.exports = {
     enabled: (process.env.REPORT_GAS) ? true : false,
     currency: 'EUR',
     noColors: true,
-    outputFile: "gas-report-hre.txt",
+    outputFile: "gas-report.txt",
     coinmarketcap: process.env.COINMAKERKET_API_KEY
   }
 };

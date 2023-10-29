@@ -15,8 +15,9 @@ const Voting2 = () => {
         VITE_HARDHAT_CONTRACT_ADDRESS
         VITE_ARBITRUM_CONTRACT_ADDRESS
         VITE_SEPOLIA_CONTRACT_ADDRESS
+        VITE_OPTIMISM_CONTRACT_ADDRESS
      */
-    const contractAddress = import.meta.env.VITE_HARDHAT_CONTRACT_ADDRESS
+    const contractAddress = import.meta.env.VITE_OPTIMISM_CONTRACT_ADDRESS
 
     const [candidates, setCandidates] = useState([]);
     const [signerContract, setSignerContract] = useState();
