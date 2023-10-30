@@ -18,7 +18,7 @@ export const Landing = () => {
               <Button 
                 size="large" 
                 variant="contained" 
-                onClick={() => navigate("/vote")}
+                onClick={() => navigate("/vote2")}
                 sx={{ height: "4rem", width: "40%", borderRadius: '16px'}}>
                 Vote Now
               </Button>

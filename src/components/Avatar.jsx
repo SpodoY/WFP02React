@@ -1,7 +1,7 @@
 import Avatar from "boring-avatars";
 import { useState, useEffect } from "react";
 import { ethers, formatEther } from "ethers";
-import { Button, Container, Typography, Stack, Box } from "@mui/material";
+import { Button, Typography, Stack, Box } from "@mui/material";
 import { ContentCopy } from "@mui/icons-material";
 
 const AccountInfo = ({ size }) => {

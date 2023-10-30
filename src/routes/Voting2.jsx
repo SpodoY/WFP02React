@@ -17,7 +17,8 @@ const Voting2 = () => {
         VITE_SEPOLIA_CONTRACT_ADDRESS
         VITE_OPTIMISM_CONTRACT_ADDRESS
      */
-    const contractAddress = import.meta.env.VITE_OPTIMISM_CONTRACT_ADDRESS
+    //TODO: CHANGE CONTRACT ADDRESS TO Global Var. so it works for all sub-pages
+    const contractAddress = import.meta.env.VITE_HARDHAT_CONTRACT_ADDRESS
 
     const [candidates, setCandidates] = useState([]);
     const [signerContract, setSignerContract] = useState();
