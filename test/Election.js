@@ -32,9 +32,11 @@ describe("Election contract", () => {
 
         const candidateID = 2;
 
+        console.log("Voting")
         await contract.vote(candidateID);
 
-        const votedPerson = contract.voters()
+        // const votedPerson = contract.voters()
+        console.log("Checking candidate")
         const testCandidate = await contract.candidates(candidateID);
 
         // Asserts

@@ -5,10 +5,10 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import AccountInfo from "../components/Avatar";
 import { cheerfulFiestaPalette } from "@mui/x-charts";
 
-const Result = () => {
+const Result = ({contract_address}) => {
   const [dataSet, setDataSet] = useState([]);
 
-  const contractAddress = import.meta.env.VITE_HARDHAT_CONTRACT_ADDRESS;
+  const contractAddress = contract_address;
 
   const ABI = [
     {

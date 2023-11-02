@@ -5,7 +5,7 @@ import CandidateCard from '../components/Candidate';
 import AccountInfo from '../components/Avatar';
 import NavBar from '../components/NavBar';
 
-const Voting2 = () => {
+const Voting2 = ({contract_address}) => {
 
     let signer = null;
     let provider;
@@ -18,7 +18,7 @@ const Voting2 = () => {
         VITE_OPTIMISM_CONTRACT_ADDRESS
      */
     //TODO: CHANGE CONTRACT ADDRESS TO Global Var. so it works for all sub-pages
-    const contractAddress = import.meta.env.VITE_HARDHAT_CONTRACT_ADDRESS
+    const contractAddress = contract_address
 
     const [candidates, setCandidates] = useState([]);
     const [signerContract, setSignerContract] = useState();

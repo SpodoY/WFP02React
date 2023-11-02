@@ -1,24 +1,25 @@
-import { AppBar, Button, Box, Container, Toolbar } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Tabs, Tab, Box } from "@mui/material";
+
+const LinkTab = (props) => {
+  return <Tab component="a" {...props} />;
+};
 
 const NavBar = () => {
+  const [value, setValue] = useState(0);
+
+  const handleChange = (event, newVal) => {
+    setValue(newVal)
+  };
+
   return (
-    <AppBar position="fixed" sx={{backgroundColor: '#001427', top: "auto", bottom: 0 }}>
-      <Toolbar>
-        <Container sx={{ flexGrow: 1, justifyContent: "space-around"}} >
-            <Button variant="contained"> Vote Results </Button>
-        </Container>
-      </Toolbar>
-    </AppBar>
-    // <Container
-    //     sx={{
-    //         backgroundColor: '#001427',
-    //         width: '100vw',
-    //         height: '40px',
-    //         position: 'absolute',
-    //     }}
-    // >
-    //     a
-    // </Container>
+    <Box sx={{ width: "100%" }}>
+      <Tabs value={value} onChange={handleChange} centered aria-label="nav tabs example">
+        <LinkTab label="Startseite" href="/" />
+        <LinkTab label="Wählen" href="/vote2" />
+        <LinkTab label="Ergebnis" href="/results" />
+      </Tabs>
+    </Box>
   );
 };
 

@@ -7,6 +7,15 @@ import Landing  from './routes/Landing'
 import Voting2 from './routes/Voting2'
 import ErrorPage from './Error-Page'
 
+/*
+    VITE_HARDHAT_CONTRACT_ADDRESS
+    VITE_ARBITRUM_CONTRACT_ADDRESS
+    VITE_SEPOLIA_CONTRACT_ADDRESS
+    VITE_OPTIMISM_CONTRACT_ADDRESS
+    */
+//TODO: CHANGE CONTRACT ADDRESS TO Global Var. so it works for all sub-pages
+const contractAddress = import.meta.env.VITE_OPTIMISM_CONTRACT_ADDRESS
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -15,7 +24,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/results",
-        element: <Result />
+        element: <Result contract_address={contractAddress} />
     },
     {
         path: "/vote",
@@ -23,7 +32,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/vote2",
-        element: <Voting2 />
+        element: <Voting2 contract_address={contractAddress} />
     },
 ])
 
