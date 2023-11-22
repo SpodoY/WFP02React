@@ -5,6 +5,7 @@ import Voting from './routes/Voting'
 import Result  from './routes/Results'
 import Landing  from './routes/Landing'
 import ErrorPage from './Error-Page'
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 
 /*
     VITE_HARDHAT_CONTRACT_ADDRESS
@@ -31,8 +32,24 @@ const router = createBrowserRouter([
     },
 ])
 
+const theme = createTheme({
+    palette: {
+        mode: "light",
+        primary: {
+            main: '#EC6669',
+            contrastText: '#F7D0D2'
+        },
+        secondary: {
+            main: '#F7D0D2'
+        }
+    }
+})
+
 ReactDOM.createRoot(document.getElementById('app')).render(
     <React.StrictMode>
-        <RouterProvider router={router} />
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <RouterProvider router={router} />
+        </ThemeProvider>
     </React.StrictMode>
 )
