@@ -56,7 +56,6 @@ const Result = ({ contract_address }) => {
     if (window.ethereum) {
       // This tracks MetaMask account changes and then updates all values
       window.ethereum.on("accountsChanged", handleAccountsChanged);
-      // await handleAccountsChanged();
 
       // Get permission to query accounts
       await window.ethereum.request({ method: "eth_requestAccounts" });

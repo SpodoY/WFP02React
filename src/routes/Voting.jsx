@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import AccountInfo from "../components/Avatar";
 import NavBar from "../components/NavBar";
+import { queryCandidates } from "../utils/QueryCandidates";
 
 import {
   Stack,
@@ -49,7 +50,7 @@ const Voting2 = ({ contract_address }) => {
     setSignerContract(new Contract(contractAddress, ElectionSol.abi, signer));
 
     // Fills list of candidates from smart contract
-    queryCandidates(contract);
+    setCandidates(await queryCandidates(contract));
   };
 
   useEffect(async () => {
@@ -64,21 +65,6 @@ const Voting2 = ({ contract_address }) => {
     // This tracks MetaMask account changes and then updates all values
     window.ethereum.on("accountsChanged", handleAccountsChanged);
   }, []);
-
-  const queryCandidates = async (contractObject) => {
-    // Queries how many candidates we have (4)
-    const candidateAmount = await contractObject.candidateCount();
-
-    // Needed since umm... useState shenanigangs
-    let buffer = Array();
-
-    // Adds all candidates to buffer
-    for (let i = 1; i <= candidateAmount; i++) {
-      buffer.push(await contractObject.candidates(i));
-    }
-    // Updates candidates
-    setCandidates(buffer);
-  };
 
   const handleVoteSumbission = async (event) => {
     event.preventDefault()
