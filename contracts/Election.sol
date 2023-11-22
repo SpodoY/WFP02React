@@ -6,6 +6,7 @@ contract Election {
     struct Candidate {
         uint id;
         string name;
+        string party;
         uint voteCount;
     }
 
@@ -22,15 +23,15 @@ contract Election {
     event votedEvent(uint indexed _candidateId);
 
     constructor() {
-        addCandidate("Winter Thomas");
-        addCandidate("Nowak Maximilian");
-        addCandidate("Nenning Simon");
-        addCandidate("Moser Christina");
+        addCandidate("Winter Thomas", unicode"Waschbär Partei - ÖWP");
+        addCandidate("Nenning Simon", unicode"Mathe Partei - ÖMP");
+        addCandidate("Nowak Maximilian", unicode"Verteile Systeme Grupope - VSG");
+        addCandidate("Moser Christina", unicode"Weinlieber Klub - WLÖ");
     }
 
-    function addCandidate(string memory _name) private {
+    function addCandidate(string memory _name, string memory _party) private {
         candidateCount++;
-        candidates[candidateCount] = Candidate(candidateCount, _name, 0);
+        candidates[candidateCount] = Candidate(candidateCount, _name, _party, 0);
     }
 
     function vote(uint _candidateId) public {

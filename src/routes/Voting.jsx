@@ -1,268 +1,152 @@
-import { useState, useEffect } from 'react';
-import { Contract, ethers, formatEther } from 'ethers';
-import Container from 'react-bootstrap/Container'
-import { Row, Col, Form, Button, Toast, ToastContainer, Table } from 'react-bootstrap';
+import { useState, useEffect } from "react";
+import { Contract, ethers, formatEther } from "ethers";
+import { useNavigate } from "react-router-dom";
 
-const Voting = () => {
+import AccountInfo from "../components/Avatar";
+import NavBar from "../components/NavBar";
 
-    let signer = null;
-    let provider;
-    let balance;
-    let contract;
+import {
+  Stack,
+  Typography,
+  Button,
+  Container,
+  RadioGroup,
+} from "@mui/material";
+import { HowToVote } from "@mui/icons-material";
+import CandidatePicker from "../components/CandidatePicker";
+import ElectionSol from "../artifacts/contracts/Election.sol/Election.json";
 
-    /*
+const Voting2 = ({ contract_address }) => {
+  let signer = null;
+  let provider;
+  let contract;
+
+  const navigate = useNavigate();
+
+  /*
         VITE_HARDHAT_CONTRACT_ADDRESS
         VITE_ARBITRUM_CONTRACT_ADDRESS
         VITE_SEPOLIA_CONTRACT_ADDRESS
+        VITE_OPTIMISM_CONTRACT_ADDRESS
      */
-    const contractAddress = import.meta.env.VITE_HARDHAT_CONTRACT_ADDRESS
+  //TODO: CHANGE CONTRACT ADDRESS TO Global Var. so it works for all sub-pages
+  const contractAddress = contract_address;
 
-    const [accountAddress, setAccountAddress] = useState("");
-    const [accBalance, setAccBalance] = useState();
-    const [candidates, setCandidates] = useState([]);
-    const [signerContract, setSignerContract] = useState();
-    const [vote, setVote] = useState('');
-    const [hasVoted, setHasVoted] = useState(false)
+  const [candidates, setCandidates] = useState([]);
+  const [signerContract, setSignerContract] = useState();
 
-    // For Toast
-    const [show, setShow] = useState(false)
+  const handleAccountsChanged = async () => {
+    provider = new ethers.BrowserProvider(window.ethereum);
 
-    const ABI = [
-        {
-            "inputs": [],
-            "stateMutability": "nonpayable",
-            "type": "constructor"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "internalType": "uint256",
-                    "name": "_candidateId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "votedEvent",
-            "type": "event"
-        },
-        {
-            "inputs": [],
-            "name": "candidateCount",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "name": "candidates",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "id",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "string",
-                    "name": "name",
-                    "type": "string"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "voteCount",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "_candidateId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "vote",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "name": "voters",
-            "outputs": [
-                {
-                    "internalType": "bool",
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        }
-    ]
+    // Needed for writing operations since provider can't do that
+    signer = await provider.getSigner();
 
-    const handleAccountsChanged = async () => {
-        let accs;
-        provider = new ethers.BrowserProvider(window.ethereum)
+    /**
+     * Creates a contract object with my contract address, the defined functions
+     * inside the ABI and as a provider -> we can't write just read yet
+     * */
+    contract = new Contract(contractAddress, ElectionSol.abi, provider);
+    setSignerContract(new Contract(contractAddress, ElectionSol.abi, signer));
 
-        accs = (await provider.listAccounts())[0]
-        setAccountAddress(accs.address)
+    // Fills list of candidates from smart contract
+    queryCandidates(contract);
+  };
 
-        // Needed for writing operations since provider can't do that
-        signer = await provider.getSigner();
-
-        // Get balance of current account
-        balance = await provider.getBalance(accs.address)
-        setAccBalance(formatEther(balance))
-
-        /**
-         * Creates a contract object with my contract address, the defined functions
-         * inside the ABI and as a provider -> we can't write just read yet
-         * */
-        contract = new Contract(contractAddress, ABI, provider)
-        setSignerContract(new Contract(contractAddress, ABI, signer));
-
-        // Fills list of candidates from smart contract
-        queryCandidates(contract)
-        setHasVoted(await contract.voters(accs.address))
+  useEffect(async () => {
+    // Connect to the Blockchain via MetaMask
+    if (window.ethereum === null) {
+      // If metamask is not installed, use default provider
+      provider = ethers.getDefaultProvider();
+    } else {
+      await handleAccountsChanged();
     }
 
-    useEffect(async () => {
+    // This tracks MetaMask account changes and then updates all values
+    window.ethereum.on("accountsChanged", handleAccountsChanged);
+  }, []);
 
-        // Connect to the Blockchain via MetaMask
-        if (window.ethereum == null) {
+  const queryCandidates = async (contractObject) => {
+    // Queries how many candidates we have (4)
+    const candidateAmount = await contractObject.candidateCount();
 
-            // If metamask is not installed, use default provider
-            provider = ethers.getDefaultProvider();
+    // Needed since umm... useState shenanigangs
+    let buffer = Array();
 
-        } else {
-            await handleAccountsChanged()
-        }
-
-        // This tracks MetaMask account changes and then updates all values
-        window.ethereum.on('accountsChanged', handleAccountsChanged);
-
-    }, [])
-
-    const queryCandidates = async (contractObject) => {
-
-        // Queries how many candidates we have (4)
-        const candidateAmount = await contractObject.candidateCount();
-
-        // Needed since umm... useState shenanigangs
-        let buffer = Array()
-
-        // Adds all candidates to buffer
-        for (let i = 1; i <= candidateAmount; i++) {
-            const curCandidate = await contractObject.candidates(i)
-            buffer.push(curCandidate)
-        }
-        // Updates candidates
-        setCandidates(buffer)
+    // Adds all candidates to buffer
+    for (let i = 1; i <= candidateAmount; i++) {
+      buffer.push(await contractObject.candidates(i));
     }
+    // Updates candidates
+    setCandidates(buffer);
+  };
 
-    const handleVoteSelection = (event) => {
-        setVote(candidates.find((voter) => voter.name === event.target.value))
+  const handleVoteSumbission = async (event) => {
+    event.preventDefault()
+    const votedCandidateId = event.target.candidates.value
+    console.log(votedCandidateId)
+
+    try {
+      const voteTransaction = await signerContract.vote(votedCandidateId);
+      const voteResult = await voteTransaction.wait();
+      // console.log(voteResult) // For debugging
+      navigate("/results");
+    } catch (error) {
+      console.log(error);
     }
+  };
 
-    const handleVoteSumbission = async (event) => {
-        event.preventDefault();
-        // Checks if the selected candidate is valid
-        // if (candidates.find((voter) => voter.name === vote[1]) && !hasVoted) {
-        try {
-            signerContract.vote(vote.id);
-        } catch (error) {
-            setShow(true)
-            console.log(error)
-        }
-        balance = await provider.getBalance(accs.address)
-        setAccBalance(formatEther(balance))
+  return (
+    <>
+      <NavBar />
+      <Stack direction="row" justifyContent={"space-around"}>
+        <p>
+          <Typography align="center" variant="h4" fontWeight={"bold"}>
+            {" "}
+            Elektronischer{" "}
+          </Typography>
+          <Typography align="center" variant="h4" fontWeight={"bold"}>
+            {" "}
+            Stimmzettel für die{" "}
+          </Typography>
+          <Typography align="center" variant="h4" fontWeight={"bold"}>
+            {" "}
+            Wahl 2023{" "}
+          </Typography>
+        </p>
+        <AccountInfo size={100} />
+      </Stack>
+      <Container component="form" onSubmit={handleVoteSumbission}>
+        {/* <FormLabel> Candidates </FormLabel> */}
+        <RadioGroup name="candidates">
+          {candidates
+            ? candidates.map(({ name, party, id }) => {
+                console.log(name, party);
+                return <CandidatePicker name={name} party={party} id={id} />;
+              })
+            : []}
+        </RadioGroup>
+        <Button
+          type="submit"
+          variant="contained"
+          endIcon={<HowToVote />}
+        >
+          Wählen
+        </Button>
+      </Container>
 
+      {/* <Grid mt={2} sx={{width: '75%', marginX: 'auto' }} container rowSpacing={8} columnSpacing={4} >
+                {candidates ? candidates.map((candidate) => {
+                    return (
+                        <>
+                            <Grid xs={4}>
+                                <CandidateCard voteFunction={handleVoteSumbission} candidateInfo={candidate} animalName={"raccoon"}/>
+                            </Grid>
+                        </>
+                    )
+                }) : []}
+            </Grid> */}
+    </>
+  );
+};
 
-        // } else {
-        //     // Toast of invalid vote logic
-        //     setShow(true)
-        // }
-    }
-
-    return (
-        <>
-            <Container>
-                <Row className='mt-4'>
-                    <Col>
-                        <h3> Welcome to the election </h3>
-                        <p> Currently voting as: {accountAddress} ETH</p>
-                        <p> Current balance: {accBalance} ETH</p>
-                    </Col>
-                </Row>
-                <Form onSubmit={handleVoteSumbission}>
-                    <Form.Select onChange={handleVoteSelection} size='lg' aria-label="Default select example">
-                        <option>Please choose a candidate</option>
-                        {candidates ? candidates.map((candidate) => {
-                            return (
-                                <option value={candidate.name} >{candidate.name}</option>
-                            )
-                        }) : []}
-                    </Form.Select>
-                    <Button style={{ marginTop: 10 }} type='submit'> Submit Vote </Button>
-                </Form>
-
-                <Table>
-                    <thead>
-                        <tr>
-                            <th> # </th>
-                            <th> Name </th>
-                            <th> Votes </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {candidates ? candidates
-                            .sort((a, b) => (a.voteCount > b.voteCount ? -1 : 1))
-                            .map((candidate) => {
-                                return (
-                                    <tr>
-                                        <td> {candidate.id} </td>
-                                        <td> {candidate.name} </td>
-                                        <td> {candidate.voteCount} </td>
-                                    </tr>
-                                )
-                            })
-                            : []}
-                    </tbody>
-                </Table>
-
-                <ToastContainer className='m-2' position='bottom-end'>
-                    <Toast bg="danger" onClose={() => setShow(false)} show={show} delay={3000} autohide>
-                        <Toast.Body className='text-white'>
-                            {hasVoted ? "You have already voted" : "Your vote was invalid"}
-                        </Toast.Body>
-                    </Toast>
-                </ToastContainer>
-            </Container >
-        </>
-    )
-
-}
-
-export default Voting
+export default Voting2;

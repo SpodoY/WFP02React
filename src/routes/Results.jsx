@@ -3,119 +3,28 @@ import { Contract, ethers } from "ethers";
 
 import { BarChart } from "@mui/x-charts/BarChart";
 import AccountInfo from "../components/Avatar";
+import NavBar from "../components/NavBar";
 import { cheerfulFiestaPalette } from "@mui/x-charts";
+import ElectionSol from "../artifacts/contracts/Election.sol/Election.json";
 
 const Result = ({contract_address}) => {
   const [dataSet, setDataSet] = useState([]);
+  const [provider, setProvider] = useState(null);
+  const [contract, setContract] = useState(null);
 
   const contractAddress = contract_address;
 
-  const ABI = [
-    {
-      inputs: [],
-      stateMutability: "nonpayable",
-      type: "constructor",
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "uint256",
-          name: "_candidateId",
-          type: "uint256",
-        },
-      ],
-      name: "votedEvent",
-      type: "event",
-    },
-    {
-      inputs: [],
-      name: "candidateCount",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
-      ],
-      name: "candidates",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "id",
-          type: "uint256",
-        },
-        {
-          internalType: "string",
-          name: "name",
-          type: "string",
-        },
-        {
-          internalType: "uint256",
-          name: "voteCount",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "_candidateId",
-          type: "uint256",
-        },
-      ],
-      name: "vote",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
-      ],
-      name: "voters",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-  ];
+  const ABI = ElectionSol.abi
 
   const handleAccountsChanged = async () => {
-    let provider = new ethers.BrowserProvider(window.ethereum);
+    let provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545/");
+    console.log(window.ethereum)
 
     /**
      * Creates a contract object with my contract address, the defined functions
      * inside the ABI and as a provider -> we can't write just read yet
      * */
-    let contract = new Contract(contractAddress, ABI, provider);
-
-    // Fills list of candidates from smart contract
-    queryCandidates(contract);
+    setContract(new Contract(contractAddress, ABI, provider));
   };
 
   const queryCandidates = async (contractObject) => {
@@ -139,20 +48,50 @@ const Result = ({contract_address}) => {
   };
 
   useEffect(async () => {
-    // Connect to the Blockchain via MetaMask
-    if (window.ethereum == null) {
-      // If metamask is not installed, use default provider
-      provider = ethers.getDefaultProvider();
-    } else {
-      await handleAccountsChanged();
-    }
+      queryCandidates(contract)
+  }, [contract])
 
-    // This tracks MetaMask account changes and then updates all values
-    window.ethereum.on("accountsChanged", handleAccountsChanged);
+  useEffect(async () => {
+    // Checks if MetaMask is installed and either connects via MetaMask or fallback
+    if (window.ethereum) {
+      // This tracks MetaMask account changes and then updates all values
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      await handleAccountsChanged();
+
+      // Get permission to query accounts
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+      // Browser provider from MetaMask's provider
+      const browserProvider = new ethers.BrowserProvider(window.ethereum);
+
+      setProvider(browserProvider);
+    } else {
+      // Since MetaMask is not installed try default provider
+      setProvider(ethers.getDefaultProvider());
+    }
   }, []);
+
+  useEffect(async () => {
+    if (provider) {
+      const eventFilter = contract.filters.votedEvent();
+
+      const eventListener = async () => {
+        const events = await contract.queryFilter(eventFilter);
+        queryCandidates(contract)
+        console.log("Voted Events: ", events)
+      }
+
+      contract.on(eventFilter, eventListener)
+
+      return () => {
+        contract.off(eventFilter, eventListener)
+      }
+    }
+  }, [provider]);
 
   return (
     <>
+      <NavBar />
       <AccountInfo size={100} />
       <BarChart
         sx={{ width: "100%" }}
