@@ -36,11 +36,16 @@ const AccountInfo = ({ size }) => {
           variant="beam"
           colors={["#001427", "#708D81", "#F4D58D", "#BF0603", "#8D0801"]}
         />
-        <Box sx={{ position: "relative", top: -15 }}>
+        <Box sx={{ position: "relative", top: -15, textAlign: "center" }}>
           <Button
-            sx={{ borderRadius: "16px", width: `${size * 1.5}px`}}
+            sx={{ 
+              '&:hover': {
+                backgroundColor: '#fff'
+              },
+              borderRadius: "16px", backgroundColor: '#fff', border: 'solid 2px', fontWeight: 600}
+            }
             size="small"
-            variant="contained"
+            variant="text"
             startIcon={<ContentCopy />}
           >
             {walletAddress.substring(0, 5) +

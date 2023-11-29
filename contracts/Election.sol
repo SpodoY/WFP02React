@@ -25,7 +25,7 @@ contract Election {
     constructor() {
         addCandidate("Winter Thomas", unicode"Waschbär Partei - ÖWP");
         addCandidate("Nenning Simon", unicode"Mathe Partei - ÖMP");
-        addCandidate("Nowak Maximilian", unicode"Verteile Systeme Grupope - VSG");
+        addCandidate("Nowak Maximilian", unicode"Verteile Systeme Gruppe - VSG");
         addCandidate("Moser Christina", unicode"Weinlieber Klub - WLÖ");
     }
 

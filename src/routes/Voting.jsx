@@ -67,9 +67,9 @@ const Voting2 = ({ contract_address }) => {
   }, []);
 
   const handleVoteSumbission = async (event) => {
-    event.preventDefault()
-    const votedCandidateId = event.target.candidates.value
-    console.log(votedCandidateId)
+    event.preventDefault();
+    const votedCandidateId = event.target.candidates.value;
+    console.log(votedCandidateId);
 
     try {
       const voteTransaction = await signerContract.vote(votedCandidateId);
@@ -102,19 +102,20 @@ const Voting2 = ({ contract_address }) => {
         <AccountInfo size={100} />
       </Stack>
       <Container component="form" onSubmit={handleVoteSumbission}>
-        {/* <FormLabel> Candidates </FormLabel> */}
         <RadioGroup name="candidates">
-          {candidates
-            ? candidates.map(({ name, party, id }) => {
-                console.log(name, party);
-                return <CandidatePicker name={name} party={party} id={id} />;
-              })
-            : []}
+          <Stack direction={"column"} gap={1}>
+            {candidates
+              ? candidates.map(({ name, party, id }) => {
+                  console.log(name, party);
+                  return <CandidatePicker name={name} party={party} id={id} />;
+                })
+              : []}
+          </Stack>
         </RadioGroup>
-        <Button
-          type="submit"
+        <Button sx={{ width: 250, height: 70, fontSize: "1.4rem", fontWeight: 600, textTransform: "inherit", marginTop: 4}} 
+          type="submit" 
           variant="contained"
-          endIcon={<HowToVote />}
+          endIcon={<HowToVote sx={{fontSize: "32px !important"}} />}
         >
           Wählen
         </Button>

@@ -22,9 +22,6 @@ module.exports = {
     artifacts: './src/artifacts'
   },
   networks: {
-    hardhat: {
-      chainId: 31337,
-    },
     sepolia: {
       url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [MNEMONIC],

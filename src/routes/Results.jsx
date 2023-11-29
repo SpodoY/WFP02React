@@ -6,6 +6,7 @@ import AccountInfo from "../components/Avatar";
 import NavBar from "../components/NavBar";
 import { cheerfulFiestaPalette } from "@mui/x-charts";
 import ElectionSol from "../artifacts/contracts/Election.sol/Election.json";
+import { Container } from "@mui/material";
 
 const Result = ({ contract_address }) => {
   const [dataSet, setDataSet] = useState([]);
@@ -38,8 +39,8 @@ const Result = ({ contract_address }) => {
     for (let i = 1; i <= candidateAmount; i++) {
       const curCandidate = await contractObject.candidates(i);
       newDataSet.push({
-        candidate: curCandidate.name,
-        votes: Number(BigInt(curCandidate.voteCount)),
+        data: [Number(BigInt(curCandidate.voteCount))],
+        label: curCandidate.name,
       });
     }
     // Updates dataset
@@ -100,14 +101,21 @@ const Result = ({ contract_address }) => {
     <>
       <NavBar />
       <AccountInfo size={100} />
-      <BarChart
-        sx={{ width: "100%" }}
-        dataset={dataSet.length !== 0 ? dataSet : [{}]}
-        colors={cheerfulFiestaPalette}
-        xAxis={[{ dataKey: "candidate", scaleType: "band" }]}
-        series={[{ dataKey: "votes" }]}
-        height={300}
-      />
+      <Container>
+        <BarChart
+          slotProps={{
+            legend: {
+              direction: 'row',
+              position: { vertical: 'bottom', horizontal: 'middle' }
+            },
+          }}
+          sx={{ width: "100%" }}
+          series = {dataSet}
+          colors={cheerfulFiestaPalette}
+          height={400}
+          
+        />
+      </Container>
     </>
   );
 };
